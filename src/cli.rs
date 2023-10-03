@@ -7,7 +7,7 @@ impl<'a, T: Send> CLI<'a, T> {
     /// # Arguments
     /// * `line` - The input line to use for execution
     pub fn handle(&mut self, line: &str) -> Result<(), Box<dyn Error>> {
-        let prompt: Vec<&str> = line.split(' ').collect();
+        let prompt = split_line(line);
 
         if let Some(first) = prompt.first() {
             if let Some(command) = self.commands.get(first) {
@@ -22,7 +22,7 @@ impl<'a, T: Send> CLI<'a, T> {
     /// # Arguments
     /// * `line` - The input line to use for execution
     pub async fn handle_async(&mut self, line: &str) -> Result<(), Box<dyn Error>> {
-        let prompt: Vec<&str> = line.split(' ').collect();
+        let prompt = split_line(line);
 
         if let Some(first) = prompt.first() {
             if let Some(command) = self.commands.get(first) {
@@ -52,5 +52,69 @@ impl<'a, T: Send> Display for CLI<'_, T> {
         }
 
         Ok(())
+    }
+}
+
+/// Splits a line into seperate parts according to following rules:
+/// - Split at ' ' (space)
+/// - If a string is quoted ("), there will be no split at the space
+/// # Arguments
+/// * `line` - The line to split up
+fn split_line(line: &str) -> Vec<&str> {
+    let mut in_string = false;
+    let mut split: Vec<&str> = Vec::new();
+    let mut start: usize = 0;
+
+    for (i, c) in line.chars().enumerate() {
+        if c == '"' {
+            if !in_string {
+                start += 1
+            } else {
+                start -= 1
+            }
+            in_string = !in_string;
+            continue;
+        }
+
+        if c == ' ' && !in_string {
+            split.push(&line[start..i]);
+            start = i + 1;
+        }
+    }
+    split.push(&line[start..line.len()]);
+
+    split.retain(|s| s != &"");
+    split
+        .iter()
+        .map(|s| s.trim_start_matches('"').trim_end_matches('"'))
+        .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_no_split() {
+        let line = "help";
+        assert_eq!(split_line(line), vec!["help"]);
+    }
+
+    #[test]
+    fn test_split_spaces() {
+        let line = "help cmd";
+        assert_eq!(split_line(line), vec!["help", "cmd"])
+    }
+
+    #[test]
+    fn test_quotes_no_split() {
+        let line = "\"help\"";
+        assert_eq!(split_line(line), vec!["help"]);
+    }
+
+    #[test]
+    fn test_quotes_split_spaces() {
+        let line = "\"help\" \"cmd\"";
+        assert_eq!(split_line(line), vec!["help", "cmd"]);
     }
 }
