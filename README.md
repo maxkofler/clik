@@ -5,7 +5,7 @@ The `clik` crate provides an easy-to-use interactive CLI framework inspired by [
 # Example
 
 ```rust
-use clik::{Command, FnType, CLI};
+use clik::{Command, CLI};
 use rustyline::DefaultEditor;
 use std::error::Error;
 
@@ -23,7 +23,7 @@ fn main() {
     let mut cli = CLI::new(LightState { light: false });
 
     // Define the 'toggle' command
-    let command = Command::new("toggle", "Toggles the light", FnType::Sync(toggle_function));
+    let command = Command::new("toggle", "Toggles the light", toggle_function);
 
     // Add the new command to the CLI
     cli.add_command(command);
