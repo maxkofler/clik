@@ -2,6 +2,22 @@ use std::{error::Error, fmt::Display};
 
 use crate::{Command, CLI};
 
+#[derive(Debug)]
+struct NoCommandError {
+    command: String,
+}
+
+impl Display for NoCommandError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "No matching command has been found for '{}'",
+            self.command
+        )
+    }
+}
+impl Error for NoCommandError {}
+
 impl<'a, T: Send> CLI<'a, T> {
     /// Handle an input line. This line gets split up and then processed by all the commands
     /// # Arguments
@@ -11,11 +27,15 @@ impl<'a, T: Send> CLI<'a, T> {
 
         if let Some(first) = prompt.first() {
             if let Some(command) = self.commands.get(first) {
-                command.handle(&mut self.state, &prompt[1..prompt.len()])?
+                command.handle(&mut self.state, &prompt[1..prompt.len()])
+            } else {
+                Err(Box::new(NoCommandError {
+                    command: first.to_string(),
+                }))
             }
+        } else {
+            Ok(())
         }
-
-        Ok(())
     }
 
     /// Handle an input line asynchronously. This line gets split up and then processed by all the commands
