@@ -4,7 +4,7 @@
 //!
 //! # Example
 //! ```
-//! use clik::{Command, FnType, CLI};
+//! use clik::{Command, CLI};
 //! use rustyline::DefaultEditor;
 //! use std::error::Error;
 //!
@@ -22,7 +22,7 @@
 //!     let mut cli = CLI::new(LightState { light: false });
 //!
 //!     // Define the 'toggle' command
-//!     let command = Command::new("toggle", "Toggles the light", FnType::Sync(toggle_function));
+//!     let command = Command::new("toggle", "Toggles the light", toggle_function);
 //!
 //!     // Add the new command to the CLI
 //!     cli.add_command(command);
@@ -115,11 +115,25 @@ impl<'a, T: Send> Command<'a, T> {
     /// * `name` - The name of the command, as typed into the CLI
     /// * `help` - The help string to describe this command
     /// * `callback` - The funcion to call when there is a match for this command
-    pub fn new(name: &'a str, help: &'a str, callback: FnType<T>) -> Self {
+    pub fn new(name: &'a str, help: &'a str, callback: Fn<T>) -> Self {
         Self {
             name,
             help,
-            callback,
+            callback: FnType::Sync(callback),
+            subcommands: HashMap::new(),
+        }
+    }
+
+    /// Create a new command with a name and help string
+    /// # Arguments
+    /// * `name` - The name of the command, as typed into the CLI
+    /// * `help` - The help string to describe this command
+    /// * `callback` - The async funcion to call when there is a match for this command
+    pub fn new_async(name: &'a str, help: &'a str, callback: AsyncFn<T>) -> Self {
+        Self {
+            name,
+            help,
+            callback: FnType::Async(callback),
             subcommands: HashMap::new(),
         }
     }
