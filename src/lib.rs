@@ -56,8 +56,10 @@
 //!     Ok(())
 //! }
 //! ```
+use std::{collections::HashMap, error::Error};
 
-use std::{collections::HashMap, error::Error, future::Future, pin::Pin};
+#[cfg(feature = "async")]
+use std::{future::Future, pin::Pin};
 
 mod cli;
 mod command;
@@ -69,6 +71,7 @@ pub type Fn<T> = fn(&mut T, Vec<String>) -> Result<(), Box<dyn Error>>;
 
 // NOTE: Taken from shellfish
 /// A shorthand for an asynchronous function pointer
+#[cfg(feature = "async")]
 pub type AsyncFn<T> = fn(
     &mut T,
     Vec<String>,
@@ -78,6 +81,7 @@ pub type AsyncFn<T> = fn(
 /// A function or callback can be either synchronous or asynchronous
 pub enum FnType<T> {
     Sync(Fn<T>),
+    #[cfg(feature = "async")]
     Async(AsyncFn<T>),
 }
 
@@ -129,6 +133,7 @@ impl<'a, T: Send> Command<'a, T> {
     /// * `name` - The name of the command, as typed into the CLI
     /// * `help` - The help string to describe this command
     /// * `callback` - The async funcion to call when there is a match for this command
+    #[cfg(feature = "async")]
     pub fn new_async(name: &'a str, help: &'a str, callback: AsyncFn<T>) -> Self {
         Self {
             name,

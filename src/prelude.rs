@@ -4,6 +4,7 @@
 ///
 /// The first argument is a Type, which is the state. The second is the
 /// async function.
+#[cfg(feature = "async")]
 #[macro_export]
 #[cfg_attr(nightly, doc(cfg(feature = "async")))]
 macro_rules! async_fn {

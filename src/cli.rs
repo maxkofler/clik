@@ -21,6 +21,7 @@ impl<'a, T: Send> CLI<'a, T> {
     /// Handle an input line asynchronously. This line gets split up and then processed by all the commands
     /// # Arguments
     /// * `line` - The input line to use for execution
+    #[cfg(feature = "async")]
     pub async fn handle_async(&mut self, line: &str) -> Result<(), Box<dyn Error>> {
         let prompt = split_line(line);
 
