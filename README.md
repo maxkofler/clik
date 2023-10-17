@@ -41,7 +41,7 @@ fn main() {
     }
 }
 
-/// This is the function that gets called if the 'toggle' command is met
+/// This is the function that gets called if the 'echo' command is met
 /// The 'state' variable is the one we previously passed to the CLI::new() function
 /// All the additional args can be parsed by using the `clik_command` macro,
 /// but they need to implement `FromStr`.
