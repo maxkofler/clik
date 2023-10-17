@@ -57,3 +57,7 @@ fn toggle_function(state: &mut LightState, args: Vec<String>) -> Result<(), Box<
     Ok(())
 }
 ```
+
+# Optional features
+
+- `async` - Allow async functions and commands

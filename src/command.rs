@@ -1,5 +1,6 @@
 use std::{error::Error, fmt::Display};
 
+#[cfg_attr(nightly, doc(cfg(feature = "async")))]
 #[cfg(feature = "async")]
 use async_recursion::async_recursion;
 
@@ -29,6 +30,7 @@ impl<'a, T: Send> Command<'a, T> {
 
         match self.callback {
             FnType::Sync(f) => (f)(state, prompt.iter().map(|a| a.to_string()).collect()),
+            #[cfg_attr(nightly, doc(cfg(feature = "async")))]
             #[cfg(feature = "async")]
             FnType::Async(_) => Err(Box::new(AsyncHandleError {})),
         }
@@ -38,6 +40,7 @@ impl<'a, T: Send> Command<'a, T> {
     /// # Arguments
     /// * `state` - The state to provide to the callback if a match is found
     /// * `prompt` - A collection of strings that form the prompt
+    #[cfg_attr(nightly, doc(cfg(feature = "async")))]
     #[cfg(feature = "async")]
     #[async_recursion]
     pub async fn handle_async(&self, state: &mut T, prompt: &[&str]) -> Result<(), Box<dyn Error>> {
