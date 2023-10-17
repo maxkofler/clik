@@ -5,14 +5,13 @@ The `clik` crate provides an easy-to-use interactive CLI framework inspired by [
 # Example
 
 ```rust
-use clik::{Command, CLI};
+use clik::{clik_command, Command, CLI};
 use rustyline::DefaultEditor;
-use std::error::Error;
 
 /// This is the state we want to store and reuse for all commands
-struct LightState {
-    /// For now we take a light that we toggle
-    light: bool,
+struct EchoState {
+    /// We store the last number that was typed
+    number: i32,
 }
 
 fn main() {
@@ -20,20 +19,22 @@ fn main() {
     let mut readline = DefaultEditor::new().unwrap();
 
     // Our CLI instance
-    let mut cli = CLI::new(LightState { light: false });
+    let mut cli = CLI::new(EchoState { number: 0 });
 
-    // Define the 'toggle' command
-    let command = Command::new("toggle", "Toggles the light", toggle_function);
-
-    // Add the new command to the CLI
-    cli.add_command(command);
+    // Add the 'echo' command to the CLI
+    cli.add_command(echo_command());
 
     // Handle all incoming lines
     loop {
         match readline.readline(">> ") {
             Ok(line) => {
                 readline.add_history_entry(&line).unwrap();
-                cli.handle(&line).unwrap()
+
+                // Handle the line using the CLI struct and respond to errors
+                match cli.handle(&line) {
+                    Ok(()) => {}
+                    Err(e) => println!("ERROR: {e}"),
+                }
             }
             Err(_) => break,
         }
@@ -42,17 +43,16 @@ fn main() {
 
 /// This is the function that gets called if the 'toggle' command is met
 /// The 'state' variable is the one we previously passed to the CLI::new() function
-/// The 'args' variable contains all the arguments that did not match on any other command
-fn toggle_function(state: &mut LightState, args: Vec<String>) -> Result<(), Box<dyn Error>> {
-    state.light = !state.light;
+/// All the additional args can be parsed by using the `clik_command` macro,
+/// but they need to implement `FromStr`.
+#[clik_command(echo, "Prints out the supplied number")]
+/// We can use multiple `clik_arg` attributes after the `clik_command` macro
+/// to describe our arguments.
+#[clik_arg(number, "The number to echo back")]
+fn echo_command(state: &mut EchoState, number: i32) {
+    println!("Updating number from {} to {}", state.number, number);
 
-    println!(
-        "The light is now {}",
-        match state.light {
-            true => "ON",
-            false => "OFF",
-        }
-    );
+    state.number = number;
 
     Ok(())
 }
