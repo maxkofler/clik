@@ -60,7 +60,6 @@ pub fn clik_command(attr: TokenStream, input: TokenStream) -> TokenStream {
     match input.sig.asyncness {
         // Synchronous function
         None => TokenStream::from(quote! {
-
             /// Construct a command struct containing the defined command
             fn #fn_name<'a>() -> clik::Command<'a, #state_type> {
                 Command::new(stringify!(#command_name), stringify!(#command_help), #new_fn_name)
@@ -77,9 +76,6 @@ pub fn clik_command(attr: TokenStream, input: TokenStream) -> TokenStream {
         }),
         // Async function
         Some(_) => TokenStream::from(quote! {
-            #[cfg(not(feature = "async"))]
-            compile_error!("clik feature 'async' is required for async functions");
-
             /// Construct a command struct containing the defined command
             fn #fn_name<'a>() -> clik::Command<'a, #state_type> {
                 Command::new_async(stringify!(#command_name), stringify!(#command_help), clik::async_fn!(#state_type, #new_fn_name))
