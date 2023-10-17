@@ -9,6 +9,7 @@ use std::{future::Future, pin::Pin};
 
 mod cli;
 mod command;
+pub mod error;
 mod prelude;
 
 // NOTE: Taken from shellfish
