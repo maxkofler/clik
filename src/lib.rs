@@ -12,6 +12,8 @@ mod command;
 pub mod error;
 mod prelude;
 
+pub use clik_codegen::*;
+
 // NOTE: Taken from shellfish
 /// A shorthand for a synchronous function pointer
 pub type Fn<T> = fn(&mut T, Vec<String>) -> Result<(), Box<dyn Error>>;
